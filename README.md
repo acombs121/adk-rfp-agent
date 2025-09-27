@@ -34,13 +34,13 @@ An ADK-powered, multi-agent RFP auditor. The system uses a multi-stage pipeline 
 - The following GCP Roles: roles/aiplatform.admin roles/storage.objects.get
 
 ### Quick Start
-1. **Clone this repository and install requirements**
+1a. **Clone this repository and install requirements**
 ```bash
     cd adk-rfp-agent
     uv sync
     source .venv/bin/activate
 ```
-   **Configure gcloud auth and project**
+ 1b.  **Configure gcloud auth and project**
 ```bash
     gcloud auth application-default login
     gcloud auth application-default set-quota-project <project-id>
