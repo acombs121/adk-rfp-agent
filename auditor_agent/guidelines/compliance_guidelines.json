@@ -1,0 +1,96 @@
+{
+  "rule_categories": [
+    {
+      "category_name": "Clarity and Scope Definition",
+      "rules": [
+        {
+          "rule_id": "SCOPE-001",
+          "description": "The RFP must clearly and specifically define the project scope, objectives, and all deliverables to avoid ambiguity and ensure comparable proposals.",
+          "incorrect_pattern": "Writing a requirement like: 'We need a new customer relationship management system.'",
+          "correct_pattern": "Specifying: 'The CRM must integrate with our existing accounting software (X), support 50 concurrent users, and provide automated weekly reporting on sales pipelines as defined in Appendix A.'"
+        },
+        {
+          "rule_id": "SCOPE-002",
+          "description": "The RFP must include specific, probing questions that require vendors to demonstrate their expertise, rather than allowing for simple 'yes/no' answers.",
+          "incorrect_pattern": "Asking: 'Does your solution support multi-factor authentication?'",
+          "correct_pattern": "Asking: 'Describe your solution's approach to multi-factor authentication, list all supported methods, and detail the end-user enrollment process.'"
+        }
+      ]
+    },
+    {
+      "category_name": "Evaluation and Process Management",
+      "rules": [
+        {
+          "rule_id": "EVAL-001",
+          "description": "The RFP must transparently outline the exact criteria for evaluation and the specific weighting of each criterion to ensure a fair process.",
+          "incorrect_pattern": "Stating that 'proposals will be evaluated based on a combination of cost and technical merit.'",
+          "correct_pattern": "Including a table in the RFP: Technical Solution (40%), Cost (30%), Vendor Experience & References (20%), Security Compliance (10%)."
+        },
+        {
+          "rule_id": "EVAL-002",
+          "description": "A clear, realistic timeline for the entire RFP process, from vendor questions to the final decision, must be explicitly stated.",
+          "incorrect_pattern": "Providing only a final submission deadline without key dates for questions or decisions.",
+          "correct_pattern": "Publishing a full schedule: RFP Issued (Date), Vendor Questions Due (Date), Answers Published (Date), Proposals Due (Date), Final Decision Announced (Date)."
+        },
+        {
+          "rule_id": "EVAL-003",
+          "description": "The RFP must dictate a mandatory, standardized format or provide a template for all proposal submissions to ensure fair and simple side-by-side comparison.",
+          "incorrect_pattern": "Allowing vendors to submit proposals in their own branding and format.",
+          "correct_pattern": "Stating: 'All proposals must use the provided template in Appendix B and adhere to the section order and page limits specified.'"
+        },
+        {
+          "rule_id": "EVAL-004",
+          "description": "The RFP must establish a formal, centralized communication protocol for all vendor questions, ensuring all participants receive the same information.",
+          "incorrect_pattern": "Answering vendor questions individually via various emails or phone calls.",
+          "correct_pattern": "Stating: 'All questions must be submitted to procurement@company.com by the deadline. A document containing all questions and their answers will be distributed to all participating vendors.'"
+        }
+      ]
+    },
+    {
+      "category_name": "Risk and Compliance Requirements",
+      "rules": [
+        {
+          "rule_id": "RISK-001",
+          "description": "The RFP must require vendors to comply with all applicable data privacy laws (e.g., GDPR, CCPA) and detail their data handling, storage, and breach notification protocols.",
+          "incorrect_pattern": "Omitting any mention of data security or privacy requirements.",
+          "correct_pattern": "Including a dedicated 'Data Security' section requiring vendors to describe their security architecture, encryption standards, and incident response plan."
+        },
+        {
+          "rule_id": "RISK-002",
+          "description": "The RFP must stipulate the minimum types and levels of insurance coverage required (e.g., Cyber Liability, E&O) and state that proof will be required before contracting.",
+          "incorrect_pattern": "Not specifying insurance requirements, leaving it to be negotiated after vendor selection.",
+          "correct_pattern": "Stating: 'As a condition of the contract, vendors must provide a COI showing active Cyber Liability coverage of at least $5M and E&O coverage of at least $2M.'"
+        },
+        {
+          "rule_id": "RISK-003",
+          "description": "The RFP must state that vendors must comply with all relevant laws and ethical standards, and require adherence to the company's Supplier Code of Conduct.",
+          "incorrect_pattern": "Assuming vendors will adhere to ethical standards without an explicit requirement.",
+          "correct_pattern": "Including a clause: 'The selected vendor must agree to and sign our Supplier Code of Conduct (see Appendix C) prior to contract execution.'"
+        },
+        {
+          "rule_id": "RISK-004",
+          "description": "The RFP must reserve the company's right to audit the vendor's processes and records to ensure compliance with contractual and regulatory obligations.",
+          "incorrect_pattern": "Failing to mention the possibility of future audits in the RFP terms.",
+          "correct_pattern": "Including a 'Right to Audit' clause in the terms and conditions section of the RFP, giving your company the right to perform security and compliance audits."
+        }
+      ]
+    },
+    {
+      "category_name": "Performance and Service Levels",
+      "rules": [
+        {
+          "rule_id": "PERF-001",
+          "description": "The RFP must require vendors to propose specific, measurable, and quantifiable Service Level Agreements (SLAs) and Key Performance Indicators (KPIs).",
+          "incorrect_pattern": "Accepting a vague vendor promise of 'excellent customer support' or 'high availability.'",
+          "correct_pattern": "Requiring vendors to complete a table specifying their proposed SLA for metrics like 'System Uptime (%)', 'Average Support Ticket Response Time (Hours)', and 'Resolution Time for Critical Issues'."
+        },
+        {
+          "rule_id": "PERF-002",
+          "description": "The RFP should state that the final contract will include remedies or penalties (e.g., service credits) for failing to meet the agreed-upon SLAs.",
+          "incorrect_pattern": "Leaving consequences for poor performance unstated in the RFP, making it harder to negotiate later.",
+          "correct_pattern": "Stating: 'The proposal must describe the vendor's proposed service credit structure for any failure to meet the required SLAs for uptime and support response.'"
+        }
+      ]
+    }
+  ]
+}

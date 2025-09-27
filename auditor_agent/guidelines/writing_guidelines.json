@@ -1,0 +1,125 @@
+{
+  "rule_categories": [
+    {
+      "category_name": "Clarity and Conciseness",
+      "rules": [
+        {
+          "rule_id": "clarity-001",
+          "description": "Use the active voice to clearly state who must perform the action. The active voice is more direct and authoritative.",
+          "incorrect_pattern": "The proposal must be submitted by the vendor by 5:00 PM EST.",
+          "correct_pattern": "The vendor must submit the proposal by 5:00 PM EST."
+        },
+        {
+          "rule_id": "clarity-002",
+          "description": "Use strong verbs instead of nominalizations (verbs turned into nouns). This makes sentences more direct and less wordy.",
+          "incorrect_pattern": "The vendor must perform an analysis of the requirements.",
+          "correct_pattern": "The vendor must analyze the requirements."
+        },
+        {
+          "rule_id": "clarity-003",
+          "description": "Eliminate redundant phrases and wordy constructions to keep the document concise and easy to read.",
+          "incorrect_pattern": "Due to the fact that the system is legacy, it will be replaced in the near future.",
+          "correct_pattern": "Because the system is legacy, it will be replaced soon."
+        },
+        {
+          "rule_id": "clarity-004",
+          "description": "Keep sentences focused on a single idea. Break complex sentences into shorter, more manageable ones.",
+          "incorrect_pattern": "The new software, which will be used by three departments and must integrate with our existing financial systems, needs to be fully implemented by Q4, and vendors should describe their training approach.",
+          "correct_pattern": "The new software will be used by three departments and must integrate with our existing financial systems. The vendor must fully implement the solution by Q4. Additionally, the proposal must describe the vendor's training approach."
+        }
+      ]
+    },
+    {
+      "category_name": "Tone and Professionalism",
+      "rules": [
+        {
+          "rule_id": "tone-001",
+          "description": "Use direct, imperative language (e.g., 'must', 'will', 'shall') for mandatory requirements. Avoid weak or polite phrasing.",
+          "incorrect_pattern": "We would appreciate it if vendors could provide their security documentation.",
+          "correct_pattern": "The vendor must provide all security compliance documentation."
+        },
+        {
+          "rule_id": "tone-002",
+          "description": "Maintain an objective, professional tone. Avoid subjective, casual, or overly enthusiastic language.",
+          "incorrect_pattern": "We are looking for a totally amazing, game-changing solution.",
+          "correct_pattern": "We require a solution that meets the performance metrics outlined in Section 4."
+        },
+        {
+          "rule_id": "tone-003",
+          "description": "Avoid slang, clichés, and overly casual idioms in all formal procurement documents.",
+          "incorrect_pattern": "Vendors who don't think outside the box will be at a disadvantage.",
+          "correct_pattern": "Vendors are encouraged to propose innovative solutions."
+        }
+      ]
+    },
+    {
+      "category_name": "Terminology and Consistency",
+      "rules": [
+        {
+          "rule_id": "term-001",
+          "description": "Define all acronyms and initialisms on their first use.",
+          "incorrect_pattern": "The solution must be compliant with HIPAA and GDPR.",
+          "correct_pattern": "The solution must be compliant with the Health Insurance Portability and Accountability Act (HIPAA) and the General Data Protection Regulation (GDPR)."
+        },
+        {
+          "rule_id": "term-002",
+          "description": "Use terminology consistently throughout the document. Define key terms (e.g., 'Vendor', 'Proposal', 'Agreement') and use them uniformly.",
+          "incorrect_pattern": "The bidder must submit their proposal. The vendor will then be notified. The supplier's contract will be finalized in Q3.",
+          "correct_pattern": "Define 'Vendor' in the introduction. Then use 'The Vendor must submit their proposal. The Vendor will then be notified. The Vendor's contract will be finalized in Q3.'"
+        },
+        {
+          "rule_id": "term-003",
+          "description": "Avoid using internal company jargon or project codenames that external vendors would not understand.",
+          "incorrect_pattern": "The software must integrate with our 'Project Titan' system.",
+          "correct_pattern": "The software must integrate with our proprietary supply chain management system."
+        }
+      ]
+    },
+    {
+      "category_name": "Formatting and Readability",
+      "rules": [
+        {
+          "rule_id": "format-001",
+          "description": "Use numbered lists for sequential steps or requirements and bullet points for non-sequential lists to improve readability.",
+          "incorrect_pattern": "The vendor must first provide a demo, then submit a cost breakdown and finally present their implementation plan.",
+          "correct_pattern": "The vendor must:\n1. Provide a product demonstration.\n2. Submit a detailed cost breakdown.\n3. Present the implementation plan."
+        },
+        {
+          "rule_id": "format-002",
+          "description": "Use a consistent and professional format for dates and currency.",
+          "incorrect_pattern": "The due date is 5/10/24, and the budget is $50k.",
+          "correct_pattern": "The due date is October 5, 2024, and the budget is $50,000 USD."
+        },
+        {
+          "rule_id": "format-003",
+          "description": "Use clear, descriptive headings and subheadings to structure the document logically, making it easy for vendors to navigate.",
+          "incorrect_pattern": "A single long section detailing all project needs.",
+          "correct_pattern": "4.0 Requirements\n  4.1 Technical Requirements\n  4.2 Security Requirements\n  4.3 Reporting Requirements"
+        }
+      ]
+    },
+    {
+      "category_name": "Grammar and Punctuation",
+      "rules": [
+        {
+          "rule_id": "grammar-001",
+          "description": "For clarity in lists within a sentence, use the Oxford (or serial) comma before the final conjunction.",
+          "incorrect_pattern": "The system must support data import, validation and reporting.",
+          "correct_pattern": "The system must support data import, validation, and reporting."
+        },
+        {
+          "rule_id": "grammar-002",
+          "description": "Ensure correct usage of commonly confused words, such as its/it's, your/you're, and their/they're/there.",
+          "incorrect_pattern": "The company must demonstrate it's ability to meet the requirements.",
+          "correct_pattern": "The company must demonstrate its ability to meet the requirements."
+        },
+        {
+          "rule_id": "grammar-003",
+          "description": "Spell out numbers under 10. Use numerals for 10 and above, unless it is the first word of a sentence.",
+          "incorrect_pattern": "The project will require 3 phases over twenty-four months.",
+          "correct_pattern": "The project will require three phases over 24 months."
+        }
+      ]
+    }
+  ]
+}

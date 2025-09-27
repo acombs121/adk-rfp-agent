@@ -1,0 +1,158 @@
+# RFP Auditor Agent
+
+## Table of Contents
+1. [Overview](#overview)
+2. [Setup](#setup)
+3. [Testing](#testing)
+4. [Architecture](#architecture)
+
+## Overview
+
+An ADK-powered, multi-agent RFP auditor. The system uses a multi-stage pipeline with four specialized agents for comprehensive document review: spelling/grammar, guidelines compliance, and result aggregation. Includes a script for Agentspace deployment via Agent Engine.
+
+### Key Features
+- **Multi-Agent Pipeline**: Four specialized agents working sequentially
+- **RFP-Specific Design**: Optimized for RFP terminology
+- **Guidelines Compliance**: Rule-based checking against writing and regulatory standards
+- **Quality Assurance**: Multi-pass validation with duplicate detection
+
+### Technology Stack
+- **Backend**: Python with Google Cloud services
+- **AI/ML**: Google Vertex AI with Gemini 2.5 Pro
+- **Framework**: Google ADK (Agent Development Kit)
+- **Deployment**: Google Cloud AgentSpace via Agent Engine
+
+## Setup
+
+### Prerequisites
+- Google Cloud SDK
+- Python 3.13+ with UV package manager
+- A Google Cloud Project
+- A Google Cloud Storage Bucket for Agent Engine Deployment Staging (optional, but required for AS deployment)
+- An Agentspace Instance (optional, but required for AS deployment)
+- The following APIs Enabled: aiplatform.googleapis.com and discoveryengine.googleapis.com
+- The following GCP Roles: roles/aiplatform.admin roles/storage.objects.get
+
+### Quick Start
+1. **Clone this repository and install requirements**
+```bash
+    cd adk-rfp-agent
+    uv sync
+```
+
+2. **Create a .env file in the /auditor_agent directory**
+- You must include the following variables in the .env file:
+    ```
+    GOOGLE_GENAI_USE_VERTEXAI=TRUE
+    GOOGLE_CLOUD_PROJECT=<project-name>
+    GOOGLE_CLOUD_LOCATION=us-central1
+    GCP_PROJECT_NUMBER=<project-number>>
+    GCP_BUCKET_NAME=<staging-bucket-name>
+    AGENT_DISPLAY_NAME=<agent-display-name> # use dashes or underscores, not spaces
+    AGENTSPACE_ID=<agentspace-instance-id>
+    ```
+
+3. **Deployment**
+   
+   **Deploy to AgentSpace:**
+   ```bash
+   cd adk-rfp-agent
+   python -m scripts.deploy_to_agentspace
+   ```
+
+### Project Structure
+```
+src/
+├── auditor_agent/           # Main agent implementation
+│   ├── agent.py            # Core logic
+│   ├── model.py            # Data models
+│   ├── guidelines/         # JSON rule files
+│   └── prompts/           # YAML configurations
+└── scripts/               # Automation scripts
+```
+
+## Testing
+
+### AgentSpace UI (After Deployment)
+1. Navigate to AgentSpace in Google Cloud Console
+2. Upload documents through the UI
+3. Review audit results
+
+### Command Line (Local Development/Testing)
+```bash
+cd src
+adk web
+```
+Starts local web server to upload documents and test the pipeline.
+
+## Architecture
+
+### Agent Pipeline
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Pipeline as RFP Audit Pipeline
+    participant FileAgent as File Retrieval
+    participant SpellAgent as Spelling & Grammar
+    participant GuideAgent as Guidelines Compliance
+    participant AggAgent as Results Aggregator
+
+    User->>Pipeline: Submit document
+    Pipeline->>FileAgent: Extract content
+    FileAgent-->>Pipeline: Document text
+    Pipeline->>SpellAgent: Check spelling/grammar
+    SpellAgent-->>Pipeline: Issues found
+    Pipeline->>GuideAgent: Check compliance
+    GuideAgent-->>Pipeline: Violations found
+    Pipeline->>AggAgent: Consolidate results
+    AggAgent-->>User: Final audit report
+```
+
+### Core Agents
+
+1. **File Retrieval Agent**
+   - Loads and extracts document content
+   - Uses ADK `load_artifacts` tool
+
+2. **Spelling & Grammar Agent**
+   - Character-level precision checking
+   - Validates punctuation and structure
+   - Checks terminology consistency
+
+3. **Guidelines Compliance Agent**
+   - Applies writing and regulatory rules
+   - Uses structured JSON guidelines
+   - Provides specific rule ID violations
+
+4. **Audit Results Aggregator**
+   - Merges results from previous agents
+   - Resolves duplicates and contradictions
+   - Formats final output
+
+### Data Models
+
+**DocumentCorrection**
+- `correction_number`: Sequential ID
+- `specific_location`: Document location
+- `text_before_revision`: Original text
+- `text_after_revision`: Corrected text
+- `reason_for_revision`: Explanation
+- `violation_category`: Error type
+- `rule_id`: Guideline rule reference
+- `severity`: Priority level
+
+**DocumentAuditResult**
+- `corrections`: List of DocumentCorrection objects
+
+### Technical Details
+- **Model**: Gemini 2.5 Pro (temperature: 0, seed: 5)
+- **Configuration**: YAML prompts, JSON guidelines
+- **Framework**: Google ADK with SequentialAgent
+- **Output**: Structured JSON with Pydantic validation
+
+### Troubleshooting
+- **Authentication**: Verify GCP credentials
+- **Permissions**: Check IAM roles
+- **Quotas**: Monitor Vertex AI limits
+- **Paths**: Verify GCS and local file paths
