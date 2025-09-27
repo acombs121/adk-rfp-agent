@@ -47,7 +47,7 @@ An ADK-powered, multi-agent RFP auditor. The system uses a multi-stage pipeline 
 ```
 
 2. **Create a .env file in the /auditor_agent directory**
-- You must include the following variables in the .env file:
+You must include the following variables in the .env file:
     ```
     GOOGLE_GENAI_USE_VERTEXAI=TRUE
     GOOGLE_CLOUD_PROJECT=<project-name>
@@ -58,9 +58,7 @@ An ADK-powered, multi-agent RFP auditor. The system uses a multi-stage pipeline 
     AGENTSPACE_ID=<agentspace-instance-id>
     ```
 
-3. **Deployment**
-   
-   **Deploy to AgentSpace:**
+3. **Deployment to Agentspace**
    ```bash
    cd adk-rfp-agent
    python -m scripts.deploy_to_agentspace
