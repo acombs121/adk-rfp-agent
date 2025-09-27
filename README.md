@@ -38,6 +38,7 @@ An ADK-powered, multi-agent RFP auditor. The system uses a multi-stage pipeline 
 ```bash
     cd adk-rfp-agent
     uv sync
+    source .venv/bin/activate
 ```
 
 2. **Create a .env file in the /auditor_agent directory**
