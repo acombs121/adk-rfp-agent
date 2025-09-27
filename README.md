@@ -40,6 +40,11 @@ An ADK-powered, multi-agent RFP auditor. The system uses a multi-stage pipeline 
     uv sync
     source .venv/bin/activate
 ```
+   **Configure gcloud auth and project**
+```bash
+    gcloud auth application-default login
+    gcloud auth application-default set-quota-project <project-id>
+```
 
 2. **Create a .env file in the /auditor_agent directory**
 - You must include the following variables in the .env file:
