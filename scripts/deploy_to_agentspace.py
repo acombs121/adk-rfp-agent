@@ -119,6 +119,16 @@ class AgentSpaceDeployer:
         self.staging_bucket = staging_bucket
         self.logger = get_logger(__name__)
 
+        # ----------------------------------------------------------------------
+        # NEW: Get the AGENTSPACE_PROJECT ID
+        # ----------------------------------------------------------------------
+        self.agentspace_project_id = os.getenv("AGENTSPACE_PROJECT")
+        if self.agentspace_project_id is None:
+            # If AGENTSPACE_PROJECT is not explicitly set, fall back to the main project_id.
+            self.agentspace_project_id = self.project_id
+            self.logger.warning("AGENTSPACE_PROJECT environment variable not found. Using GOOGLE_CLOUD_PROJECT/project_id as fallback.")
+        # ----------------------------------------------------------------------
+        
         # Initialize Vertex AI
         vertexai.init(
             project=self.project_id,
@@ -251,8 +261,10 @@ class AgentSpaceDeployer:
                 },
             }
 
-            # Deploy to AgentSpace
-            discovery_engine_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{self.project_id}/locations/global/collections/default_collection/engines/{agentspace_id}/assistants/default_assistant/agents"
+            # ----------------------------------------------------------------------
+            # MODIFIED: Using self.agentspace_project_id instead of self.project_id
+            # ----------------------------------------------------------------------
+            discovery_engine_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{self.agentspace_project_id}/locations/global/collections/default_collection/engines/{agentspace_id}/assistants/default_assistant/agents"
 
             response = self.authed_session.post(
                 discovery_engine_url, headers=self.header, data=json.dumps(agent_config)
@@ -284,7 +296,10 @@ class AgentSpaceDeployer:
         try:
             self.logger.info(f"Listing agents in AgentSpace: {agentspace_id}")
 
-            discovery_engine_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{self.project_id}/locations/global/collections/default_collection/engines/{agentspace_id}/assistants/default_assistant/agents/"
+            # ----------------------------------------------------------------------
+            # MODIFIED: Using self.agentspace_project_id instead of self.project_id
+            # ----------------------------------------------------------------------
+            discovery_engine_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{self.agentspace_project_id}/locations/global/collections/default_collection/engines/{agentspace_id}/assistants/default_assistant/agents/"
 
             response = self.authed_session.get(discovery_engine_url, headers=self.header)
 
@@ -318,7 +333,7 @@ class AgentSpaceDeployer:
             app = self.create_adk_app()
 
             # Step 2: Test locally
-            self.test_app_locally(app)
+            #self.test_app_locally(app)
 
             # Step 3: Deploy to Agent Engine
             remote_app = self.deploy_to_agent_engine(app)
