@@ -46,16 +46,14 @@ from google.auth.transport.requests import AuthorizedSession
 from vertexai import agent_engines
 from vertexai.preview import reasoning_engines
 
-# Load environment variables
-load_dotenv("./auditor_agent/.env")
-
-
 # Agent Configuration Constants
-AGENT_DISPLAY_NAME = os.getenv("AGENT_DISPLAY_NAME")
-AGENT_ENGINE_DISPLAY_NAME = os.getenv("AGENT_DISPLAY_NAME")
-AGENTSPACE_ID = os.getenv("AGENTSPACE_ID")
-AGENT_DESCRIPTION = "Audits RFP documents for Cymbal Corp., ensuring compliance with established writing guidelines, regulatory requirements and general document accuracy"
-TOOL_DESCRIPTION = "The agent audits RFP documents for Cymbal Corp., ensuring compliance with established writing guidelines, regulatory requirements and general document accuracy"
+AGENT_FOLDER = "auditor_agent"
+AGENT_DESCRIPTION = """Audits RFP documents for Cymbal Corp., ensuring compliance with established writing guidelines,
+                       regulatory requirements and general document accuracy"""
+TOOL_DESCRIPTION = """The agent audits RFP documents for Cymbal Corp., ensuring compliance with established writing guidelines,
+                    regulatory requirements and general document accuracy"""
+
+load_dotenv(f"./{AGENT_FOLDER}/.env")
 
 # Deployment Configuration Constants
 AGENT_ENGINE_REQUIREMENTS = [
@@ -63,7 +61,7 @@ AGENT_ENGINE_REQUIREMENTS = [
     "google-genai==1.39.1",
     "google-cloud-aiplatform[agent_engines]==1.109.0",
 ]
-AGENT_ENGINE_EXTRA_PACKAGES = ["auditor_agent"]
+AGENT_ENGINE_EXTRA_PACKAGES = [f"{AGENT_FOLDER}"]
 
 
 class AgentSpaceDeployer:
@@ -73,75 +71,134 @@ class AgentSpaceDeployer:
 
     def __init__(
         self,
-        project_id: Optional[str] = None,
-        project_number: Optional[str] = None,
-        location: Optional[str] = None,
+        agent_engine_project_id: Optional[str] = None,
+        agent_engine_project_number: Optional[str] = None,
+        agent_engine_location: Optional[str] = None,
+        agent_engine_display_name: Optional[str] = None,
+        agentspace_id: Optional[str] = None,
+        agentspace_project_id: Optional[str] = None,
+        agentspace_location: Optional[str] = None,
+        agentspace_agent_display_name: Optional[str] = None,
         staging_bucket: Optional[str] = None,
     ):
         """
         Initialize the AgentSpaceDeployer.
 
         Args:
-            project_id: Google Cloud project ID (defaults to GCP_PROJECT_ID from environment)
-            project_number: Google Cloud project number (defaults to GCP_PROJECT_NUMBER from environment)
-            location: Vertex AI location (defaults to GCP_LOCATION from environment)
+            agent_engine_project_id: Google Cloud project ID (defaults to GOOGLE_CLOUD_PROJECT_ID from environment)
+            agent_engine_project_number: Google Cloud project number (defaults to GOOGLE_PROJECT_NUMBER from environment)
+            agent_engine_location: Vertex AI location (defaults to GOOGLE_CLOUD_LOCATION from environment)
+            agent_engine_display_name: Display name for the Agent Engine.
+            agentspace_id: Id of the Agentspace instance from AI Applications page
+            agentspace_project_id: Google Cloud project number of agentspace, typically the same as agent_engine_project_id
+            agentspace_location: AgentSpace multi-region ('global', 'us', or 'eu').
+            agentspace_agent_display_name: Display name for the agent in AgentSpace.
             staging_bucket: GCS staging bucket for Vertex AI
         """
+        self.logger = get_logger(__name__)
+
         # Use environment variables if parameters not provided
-        if project_id is None:
-            project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
-            if project_id is None:
-                raise ValueError("GOOGLE_CLOUD_PROJECT environment variable not set and no project_id provided")
+        if agent_engine_project_id is None:
+            agent_engine_project_id = os.getenv("GOOGLE_CLOUD_PROJECT_ID")
+            if agent_engine_project_id is None:
+                raise ValueError("GOOGLE_CLOUD_PROJECT_ID environment variable not set and no google_cloud_project_id provided")
 
-        if project_number is None:
-            project_number = os.getenv("GCP_PROJECT_NUMBER")
-            if project_number is None:
-                raise ValueError("GCP_PROJECT_NUMBER environment variable not set and no project_number provided")
+        if agent_engine_project_number is None:
+            agent_engine_project_number = os.getenv("GOOGLE_CLOUD_PROJECT_NUMBER")
+            if agent_engine_project_number is None:
+                raise ValueError("GOOGLE_CLOUD_PROJECT_NUMBER environment variable not set and no agent_engine_project_number provided")
 
-        if location is None:
-            location = os.getenv("GOOGLE_CLOUD_LOCATION")
-            if location is None:
-                raise ValueError("GOOGLE_CLOUD_LOCATION environment variable not set and no location provided")
+        if agent_engine_location is None:
+            agent_engine_location = os.getenv("GOOGLE_CLOUD_LOCATION")
+            if agent_engine_location is None:
+                raise ValueError("GOOGLE_CLOUD_LOCATION environment variable not set and no agent_engine_location provided")
+
+        if agent_engine_display_name is None:
+            agent_engine_display_name = os.getenv("AGENT_ENGINE_AGENT_DISPLAY_NAME")
+            if agent_engine_display_name is None:
+                raise ValueError("AGENT_ENGINE_AGENT_DISPLAY_NAME environment variable not set and no agent_engine_display_name provided")
+
+        if agentspace_id is None:
+            agentspace_id = os.getenv("AGENTSPACE_ID")
+            if agentspace_id is None:
+                raise ValueError("AGENTSPACE_ID environment variable not set and no agentspace_id provided")
+
+        if agentspace_project_id is None:
+            agentspace_project_id = os.getenv("AGENTSPACE_PROJECT_ID")
+            if agentspace_project_id is None:
+                agentspace_project_id = agent_engine_project_id
+                self.logger.warning("AGENTSPACE_PROJECT_ID environment variable not found. Using GOOGLE_CLOUD_PROJECT_ID as fallback.")
+        
+        if agentspace_location is None:
+            agentspace_location = os.getenv("AGENTSPACE_LOCATION")
+            if agentspace_location is None:
+                raise ValueError("AGENTSPACE_LOCATION environment variable not set and no agentspace_location provided")
+        
+        if agentspace_agent_display_name is None:
+            agentspace_agent_display_name = os.getenv("AGENTSPACE_AGENT_DISPLAY_NAME")
+            if agentspace_agent_display_name is None:
+                raise ValueError("AGENTSPACE_AGENT_DISPLAY_NAME environment variable not set and no agentspace_agent_display_name provided")
+        
+        if agentspace_location not in ["global", "us", "eu"]:
+            raise ValueError(f"Invalid AGENTSPACE_LOCATION: '{agentspace_location}'. Must be one of 'global', 'us', or 'eu'.")
 
         if staging_bucket is None:
-            staging_bucket = os.getenv("GCP_BUCKET_NAME")
+            staging_bucket = os.getenv("GOOGLE_CLOUD_BUCKET_NAME")
             if staging_bucket is None:
                 # Default staging bucket pattern as fallback
-                staging_bucket = f"gs://{project_id}-staging"
+                staging_bucket = f"gs://{agent_engine_project_id}-staging"
 
         # Ensure staging bucket starts with gs://
         if staging_bucket and not staging_bucket.startswith("gs://"):
             staging_bucket = f"gs://{staging_bucket}"
 
-        self.project_id = project_id
-        self.project_number = project_number
-        self.location = location
+        self.agent_engine_project_id = agent_engine_project_id
+        self.agent_engine_project_number = agent_engine_project_number
+        self.agent_engine_location = agent_engine_location
+        self.agent_engine_display_name = agent_engine_display_name
+        self.agentspace_id = agentspace_id
+        self.agentspace_project_id = agentspace_project_id
+        self.agentspace_location = agentspace_location
+        self.agentspace_agent_display_name = agentspace_agent_display_name
         self.staging_bucket = staging_bucket
-        self.logger = get_logger(__name__)
 
-        # ----------------------------------------------------------------------
-        # NEW: Get the AGENTSPACE_PROJECT ID
-        # ----------------------------------------------------------------------
-        self.agentspace_project_id = os.getenv("AGENTSPACE_PROJECT")
-        if self.agentspace_project_id is None:
-            # If AGENTSPACE_PROJECT is not explicitly set, fall back to the main project_id.
-            self.agentspace_project_id = self.project_id
-            self.logger.warning("AGENTSPACE_PROJECT environment variable not found. Using GOOGLE_CLOUD_PROJECT/project_id as fallback.")
-        # ----------------------------------------------------------------------
-        
         # Initialize Vertex AI
         vertexai.init(
-            project=self.project_id,
-            location=self.location,
+            project=self.agent_engine_project_id,
+            location=self.agent_engine_location,
             staging_bucket=self.staging_bucket,
         )
 
         # Setup authentication
         creds, _ = default()
         self.authed_session = AuthorizedSession(creds)
-        self.header = {"X-Goog-User-Project": self.project_id, "Content-Type": "application/json"}
+        self.header = {"X-Goog-User-Project": self.agent_engine_project_id, "Content-Type": "application/json"}
 
-        self.logger.info(f"Initialized AgentSpaceDeployer with project: {project_id}")
+        self.logger.info(f"Initialized AgentSpaceDeployer with project: {agent_engine_project_id}")
+
+    def _get_discovery_engine_endpoint(self, agentspace_id: str) -> str:
+        """
+        Determines the correct Discovery Engine regional endpoint based on the explicit agentspace_location.
+
+        Args:
+            agentspace_id: The AgentSpace ID to build the URL for.
+
+        Returns:
+            The full, regionalized Discovery Engine API endpoint URL for the agents collection.
+        """
+        hostname_map = {
+            "us": "us-discoveryengine.googleapis.com",
+            "eu": "eu-discoveryengine.googleapis.com",
+            "global": "discoveryengine.googleapis.com",
+        }
+        
+        hostname = hostname_map[self.agentspace_location]
+        
+        return (
+            f"https://{hostname}/v1alpha/projects/{self.agentspace_project_id}"
+            f"/locations/{self.agentspace_location}/collections/default_collection/engines/"
+            f"{agentspace_id}/assistants/default_assistant/agents"
+        )
 
     def create_adk_app(self) -> reasoning_engines.AdkApp:
         """
@@ -165,42 +222,6 @@ class AgentSpaceDeployer:
             self.logger.error(f"Error creating ADK application: {str(e)}")
             raise
 
-    def test_app_locally(self, app: reasoning_engines.AdkApp) -> None:
-        """
-        Test the ADK application locally.
-
-        Args:
-            app: The ADK application to test
-        """
-        try:
-            self.logger.info("Testing ADK application locally")
-
-            # Create a test session
-            session = app.create_session(user_id="test_user")
-            self.logger.info(f"Created test session: {session.id}")
-
-            # Test with a simple query
-            agent_context = {
-                "message": {"role": "user", "parts": [{"text": "How were you built?"}]},
-                "events": [
-                    {
-                        "content": {"role": "user", "parts": [{"text": "how were you built ?"}]},
-                        "author": "AgentSpace_root_agent",
-                    }
-                ],
-            }
-
-            self.logger.info("Running test query")
-            for response in app.streaming_agent_run_with_events(json.dumps(agent_context)):
-                for event in response.get("events", []):
-                    self.logger.debug(f"Event: {event}")
-
-            self.logger.info("Local testing completed successfully")
-
-        except Exception as e:
-            self.logger.error(f"Error testing app locally: {str(e)}")
-            raise
-
     def deploy_to_agent_engine(self, app: reasoning_engines.AdkApp):
         """
         Deploy the ADK application to Vertex AI Agent Engine.
@@ -216,21 +237,12 @@ class AgentSpaceDeployer:
 
             remote_app = agent_engines.create(
                 agent_engine=app,
-                display_name=AGENT_ENGINE_DISPLAY_NAME,
+                display_name=self.agent_engine_display_name,
                 requirements=AGENT_ENGINE_REQUIREMENTS,
                 extra_packages=AGENT_ENGINE_EXTRA_PACKAGES,
             )
 
             self.logger.info(f"Successfully deployed to Agent Engine: {remote_app.resource_name}")
-
-            # Test the remote deployment
-            self.logger.info("Testing remote deployment")
-            for event in remote_app.stream_query(
-                user_id="test_user",
-                message="Test query for remote deployment",
-            ):
-                self.logger.debug(f"Remote event: {event}")
-
             return remote_app
 
         except Exception as e:
@@ -251,20 +263,16 @@ class AgentSpaceDeployer:
         try:
             self.logger.info(f"Deploying to AgentSpace: {agentspace_id}")
 
-            # Agent configuration
             agent_config = {
-                "displayName": AGENT_DISPLAY_NAME,
-                "description": AGENT_DESCRIPTION,
-                "adk_agent_definition": {
-                    "tool_settings": {"tool_description": TOOL_DESCRIPTION},
-                    "provisioned_reasoning_engine": {"reasoning_engine": agent_engine.resource_name},
-                },
-            }
-
-            # ----------------------------------------------------------------------
-            # MODIFIED: Using self.agentspace_project_id instead of self.project_id
-            # ----------------------------------------------------------------------
-            discovery_engine_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{self.agentspace_project_id}/locations/global/collections/default_collection/engines/{agentspace_id}/assistants/default_assistant/agents"
+                    "displayName": self.agentspace_agent_display_name,
+                    "description": AGENT_DESCRIPTION,
+                    "adk_agent_definition": {
+                        "tool_settings": {"tool_description": TOOL_DESCRIPTION},
+                        "provisioned_reasoning_engine": {"reasoning_engine": agent_engine.resource_name},
+                    },
+                }
+            
+            discovery_engine_url = self._get_discovery_engine_endpoint(agentspace_id)
 
             response = self.authed_session.post(
                 discovery_engine_url, headers=self.header, data=json.dumps(agent_config)
@@ -296,10 +304,7 @@ class AgentSpaceDeployer:
         try:
             self.logger.info(f"Listing agents in AgentSpace: {agentspace_id}")
 
-            # ----------------------------------------------------------------------
-            # MODIFIED: Using self.agentspace_project_id instead of self.project_id
-            # ----------------------------------------------------------------------
-            discovery_engine_url = f"https://discoveryengine.googleapis.com/v1alpha/projects/{self.agentspace_project_id}/locations/global/collections/default_collection/engines/{agentspace_id}/assistants/default_assistant/agents/"
+            discovery_engine_url = f"{self._get_discovery_engine_endpoint(agentspace_id)}/"
 
             response = self.authed_session.get(discovery_engine_url, headers=self.header)
 
@@ -316,33 +321,20 @@ class AgentSpaceDeployer:
             self.logger.error(f"Error listing AgentSpace agents: {str(e)}")
             raise
 
-    def deploy_complete_pipeline(self, agentspace_id: str) -> dict:
+    def deploy_complete_pipeline(self) -> dict:
         """
         Execute the complete deployment pipeline.
-
-        Args:
-            agentspace_id: The AgentSpace ID to deploy to
 
         Returns:
             Dictionary with deployment results
         """
         try:
-            self.logger.info("Starting complete deployment pipeline")
+            self.logger.info(f"Starting complete deployment pipeline, deploying to {self.agentspace_id}")
 
-            # Step 1: Create ADK app
             app = self.create_adk_app()
-
-            # Step 2: Test locally
-            #self.test_app_locally(app)
-
-            # Step 3: Deploy to Agent Engine
             remote_app = self.deploy_to_agent_engine(app)
-
-            # Step 4: Deploy to AgentSpace
-            agentspace_result = self.deploy_to_agentspace(remote_app, agentspace_id)
-
-            # Step 5: List agents to confirm deployment
-            agents_list = self.list_agentspace_agents(agentspace_id)
+            agentspace_result = self.deploy_to_agentspace(remote_app, self.agentspace_id)
+            agents_list = self.list_agentspace_agents(self.agentspace_id)
 
             results = {
                 "reasoning_engine": remote_app.resource_name,
@@ -362,88 +354,39 @@ def main():
     """
     Main function to deploy agent to AgentSpace.
     """
-    # Setup argument parser
     parser = argparse.ArgumentParser(description="Deploy ADK agent to AgentSpace")
-    parser.add_argument(
-        "--agentspace-id",
-        "-a",
-        type=str,
-        help="AgentSpace ID to deploy the agent to (defaults to AGENTSPACE_ID from environment)",
-    )
-    parser.add_argument(
-        "--project-id",
-        "-p",
-        type=str,
-        help="Google Cloud project ID (defaults to GCP_PROJECT_ID from environment)",
-    )
-    parser.add_argument(
-        "--project-number",
-        "-n",
-        type=str,
-        help="Google Cloud project number (defaults to GCP_PROJECT_NUMBER from environment)",
-    )
-    parser.add_argument(
-        "--location",
-        "-l",
-        type=str,
-        help="Vertex AI location (defaults to GCP_LOCATION from environment)",
-    )
-    parser.add_argument(
-        "--staging-bucket",
-        "-s",
-        type=str,
-        help="GCS staging bucket for Vertex AI (defaults to GCP_BUCKET_NAME from environment)",
-    )
+    parser.add_argument("--project-id", "-p", type=str, help="Google Cloud project ID (defaults to GOOGLE_CLOUD_PROJECT_ID)")
+    parser.add_argument("--project-number", "-n", type=str, help="Google Cloud project number (defaults to GOOGLE_PROJECT_NUMBER)")
+    parser.add_argument("--agent-engine-location", "-l", type=str, help="Vertex AI location for Agent Engine (e.g. us-central1)")
+    parser.add_argument("--agent-engine-display-name", type=str, help="Display name for Agent Engine")
+    parser.add_argument("--agentspace-id", "-a", type=str, help="AgentSpace ID to deploy the agent to")
+    parser.add_argument("--agentspace-project", "-ap", type=str, help="AgentSpace project to deploy the agent to")
+    parser.add_argument("--agentspace-location", "-al", type=str, help="AgentSpace multi-region ('global', 'us', or 'eu')")
+    parser.add_argument("--agentspace-agent-display-name", type=str, help="Display name for the agent in AgentSpace")
+    parser.add_argument("--staging-bucket", "-s", type=str, help="GCS staging bucket for Vertex AI")
 
     args = parser.parse_args()
-
-    # Setup logging configuration
     setup_logging()
-
-    # Get logger for main function
     logger = get_logger(__name__)
 
     try:
-        # Get agentspace ID from args or environment
-        agentspace_id = args.agentspace_id
-        if agentspace_id is None:
-            agentspace_id = os.getenv("AGENTSPACE_ID")
-            if agentspace_id is None:
-                raise ValueError(
-                    "AgentSpace ID must be provided via --agentspace-id argument or AGENTSPACE_ID environment variable"
-                )
-
-        # Initialize the deployer
         deployer = AgentSpaceDeployer(
-            project_id=args.project_id,
-            project_number=args.project_number,
-            location=args.location,
+            agent_engine_project_id=args.project_id,
+            agent_engine_project_number=args.project_number,
+            agent_engine_location=args.agent_engine_location,
+            agent_engine_display_name=args.agent_engine_display_name,
+            agentspace_id=args.agentspace_id,
+            agentspace_project_id=args.agentspace_project,
+            agentspace_location=args.agentspace_location,
+            agentspace_agent_display_name=args.agentspace_agent_display_name,
             staging_bucket=args.staging_bucket,
         )
-
-        # Execute deployment pipeline
-        results = deployer.deploy_complete_pipeline(agentspace_id)
+        results = deployer.deploy_complete_pipeline()
 
         logger.info("Deployment completed successfully!")
         logger.info(f"Reasoning Engine: {results['reasoning_engine']}")
         logger.info(f"AgentSpace Deployment: {results['agentspace_deployment']}")
-
-        # Print important notes
-        logger.info("\n" + "=" * 80)
-        logger.info("IMPORTANT DEPLOYMENT NOTES:")
-        logger.info("=" * 80)
-        logger.info("1. Ensure that Vertex AI API and Discovery Engine API are enabled in your project")
-        logger.info("1. Get your project allowlisted to be able to attach ADK agent to agentspace")
-        logger.info("2. Verify that Discovery Engine service account has 'Vertex AI User' permission")
-        logger.info("3. Check 'Include Google-provided role grants' in IAM if you cannot find the service account")
-        logger.info("4. Open AgentSpace app in GCP console -> Integration -> Use provided URL")
-        logger.info("5. Agent display names must not contain spaces for proper functionality")
-        logger.info(
-            "6. Grant necessary permissions to service-{project_number}@gcp-sa-aiplatform-re.iam.gserviceaccount.com"
-        )
-        logger.info("7. Use Trace Explorer for debugging any issues with agent responses")
-        logger.info("=" * 80)
-
+        
     except Exception as e:
         logger.error(f"Deployment failed: {str(e)}")
         raise
