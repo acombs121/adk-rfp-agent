@@ -47,16 +47,8 @@ An ADK-powered, multi-agent RFP auditor. The system uses a multi-stage pipeline 
 ```
 
 2. **Create a .env file in the /auditor_agent directory**
-You must include the following variables in the .env file:
-    ```
-    GOOGLE_GENAI_USE_VERTEXAI=TRUE
-    GOOGLE_CLOUD_PROJECT=<project-name>
-    GOOGLE_CLOUD_LOCATION=us-central1
-    GCP_PROJECT_NUMBER=<project-number>>
-    GCP_BUCKET_NAME=<staging-bucket-name>
-    AGENT_DISPLAY_NAME=<agent-display-name> # use dashes or underscores, not spaces
-    AGENTSPACE_ID=<agentspace-instance-id>
-    ```
+There is an .env.example file. Rename the file to .env and update each of the variables in the file according to the details of your environment.
+This supports cross project deployment, e.g. deploy to a staging environment porject (Agent Engine),  and expose that agent in another project (Agentspace project).
 
 3. **Deployment to Agentspace**
    ```bash
@@ -66,7 +58,7 @@ You must include the following variables in the .env file:
 
 ### Project Structure
 ```
-src/
+adk-rfp-agent/
 ├── auditor_agent/           # Main agent implementation
 │   ├── agent.py            # Core logic
 │   ├── model.py            # Data models
