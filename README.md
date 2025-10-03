@@ -76,7 +76,7 @@ adk-rfp-agent/
 
 ### Command Line (Local Development/Testing)
 ```bash
-cd src
+cd adk-rfp-agent
 adk web
 ```
 Starts local web server to upload documents and test the pipeline.
